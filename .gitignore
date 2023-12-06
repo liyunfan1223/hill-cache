@@ -1,7 +1,7 @@
 .vscode/*
 .idea/*
 build/*
-local/*
+#local/*
 plots/*
 
 # large file
