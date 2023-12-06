@@ -17,7 +17,7 @@ if __name__ == '__main__':
     print('====================================================================')
     for trace in trace_list:
         trace_file = f'traces/{trace}.lis'
-        fig, ax = plt.subplots(figsize=(14, 7))
+        fig, ax = plt.subplots(figsize=(8, 4))
         ax.set_xlim(buffer_size_list[0] // 2, buffer_size_list[-1] * 2)
         ax.set_xticks(buffer_size_list)
         ax.set_xticklabels(buffer_size_list)
