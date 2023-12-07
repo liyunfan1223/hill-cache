@@ -36,22 +36,33 @@ config = {
 
 #### configurations for memtier_benchmark ####
 config_memtier = {
-
+    'client_thread_list': [16],
+    'server_thread_list': [8],
+    'requests_per_client_thread': 300000,
+    'data_size_list': [1024],   # B
+    'mem_size_list': [64],      # MB
+    'memcached_executable': './local/memcached',
+    'memhc_executable': './local/memhc',
+    'log_file': "./local/memtier.log",
 }
     
 #### configurations for bench ####
 config_bench = {
-    'client_thread': 128,
-    'server_thread': 8,
-    'size_list': [24, 48, 72],
+    'client_thread_list': [128],
+    'server_thread_list': [8],
+    'size_list': [24],
+    'estimated_items_count': [32768, 65536, 98304],
     'max_data_length': 1024,
-    'trace_file': './traces/example.lis',
-    'early_stop_access': 0,
+    'trace_file_list': ['./traces/example.lis'],
+    'early_stop_access': 1000000,
     'sync_threads': True,
-    'warm_up_access': 0,
+    'warm_up_access': 200000,
     'manual_remote_latency': 10,
+    'bench_executable': './build/bin/bench',
     'rocksdb_path': './local/rocksdb',
     'memcached_executable': './local/memcached',
-    'memhc_executable': './local/memhc'
+    'memhc_executable': './local/memhc',
+    'log_file': "./local/bench.log",
+    'report_interval': 100000,
 }
     

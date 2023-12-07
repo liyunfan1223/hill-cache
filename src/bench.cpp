@@ -33,7 +33,6 @@ const uint32_t MAX_THREAD_NUM = 1 << 12;
 const uint32_t MEGABYTES = 1 << 20;
 const char *config_string = "--SERVER=127.0.0.1";
 const uint32_t warmup_seconds = 30;
-const uint32_t report_interval = 1 << 14;
 
 // const uint32_t simulated_network_latency = 5; // 5ms - 10ms for network
 // request
@@ -44,6 +43,7 @@ uint32_t threadNum;
 std::string kDBPath;
 DB *rocksDB;
 string traceFile;
+uint32_t report_interval = 1 << 14;
 string default_str;
 
 double timer[MAX_THREAD_NUM + 1][3];
@@ -66,7 +66,7 @@ int global_i;
 pthread_mutex_t i_mutex;
 bool threadsSync = false;
 
-std::vector<double> latency_vec;
+//std::vector<double> latency_vec;
 std::mutex latency_mutex;
 
 double GenerateRandomRTT() {
@@ -136,13 +136,9 @@ bool save_to_memcached(const char *key, string &value, uint32_t v_len,
 }
 
 bool request_from_rocksdb(const char *key, string &value) {
-    //    usleep(GenerateRandomRTT() * 1000);
     std::this_thread::sleep_for(GenerateRandomRTT() * 1ms);
-    //    std::this_thread::sleep_for(300us);
     Status status = rocksDB->Get(ReadOptions(), key, &value);
-    assert(!status.ok() || value.length() >= maxLength / 2);
     return status.ok();
-    return true;
 }
 
 bool save_to_rocksdb(const char *key, string &value, uint32_t v_len) {
@@ -160,14 +156,9 @@ enum RequestResult {
 RequestResult do_request_item(const char *key, memcached_st *memc,
                               int32_t thread_id) {
     string value;
-    //    gettimeofday(&start_time, NULL);
     if (request_from_memcached(key, value, memc, thread_id)) {
         return in_memcached;
     }
-    //    gettimeofday(&end_time, NULL);
-    //    double time = (end_time.tv_sec - start_time.tv_sec) * 1000 +
-    //    (end_time.tv_usec - start_time.tv_usec) / 1000.0; // ms
-    //    printf("memcached miss time: %.2f\n", time);
     if (request_from_rocksdb(key, value)) {
         save_to_memcached(key, value, value.length(), memc, thread_id);
         return in_rocksdb;
@@ -192,12 +183,12 @@ RequestResult request_item(const char *key, int thread_id, memcached_st *memc) {
     const std::chrono::duration<double, std::milli> elapsed = end - start;
     counter[thread_id][rr]++;
     timer[thread_id][rr] += elapsed.count();
-    if (rand() % 100 <= 10) {
-        if (latency_mutex.try_lock()) {
-            latency_vec.push_back(elapsed.count());
-            latency_mutex.unlock();
-        }
-    }
+//    if (rand() % 100 <= 10) {
+//        if (latency_mutex.try_lock()) {
+//            latency_vec.push_back(elapsed.count());
+//            latency_mutex.unlock();
+//        }
+//    }
     return rr;
 }
 
@@ -305,7 +296,7 @@ void *subprocess_work(void *arg) {
                 "tps: %.2f tps_mb: %.2f tps_mem: %.2f tps_rdb: %.2f "
                 "h_ratio: %.2f%% t_counter: %u "
                 "mem:rdb:nf=%d:%d:%d\n",
-                total_time, warming_up_counter == threadNum, average_latency,
+                total_time, warming_up_counter != threadNum, average_latency,
                 mem_latency, rdb_latency, nf_latency, throughput_req,
                 throughput_mb, throughput_mem, throughput_rdb, hit_ratio,
                 tot_counter, counter[0][0], counter[0][1], counter[0][2]);
@@ -349,16 +340,17 @@ void usage() {
               << "  -l, --max-data-length <len>         Maximum data length\n"
               << "  -f, --trace-file <file>             Trace file\n"
               << "  -e, --early-stop-access <num>       Early stop access\n"
-              << "  -s, --sync-threads <num>            Synchronize threads\n"
+              << "  -s, --sync-threads <bool>           Synchronize threads\n"
               << "  -w, --warm-up-access <num>          Warm-up access\n"
               << "  -m, --manual-remote-latency <num>   Set the manual remote latency\n"
-              << "  -d, --rocksdb-path <path>           Set rocksdb path\n";
+              << "  -d, --rocksdb-path <path>           Set rocksdb path\n"
+              << "  -r, --report-interval <num>         Report interval\n";
 }
 
 int main(int argc, char *argv[]) {
     printf("Bench started.\n");
     int opt;
-    const char *short_options = "ht:l:f:e:sw:m:d:";
+    const char *short_options = "ht:l:f:e:sw:m:d:r:";
     const option long_options[] = {
         {"help", no_argument, nullptr, 'h'},
         {"thread number", required_argument, nullptr, 't'},
@@ -369,6 +361,7 @@ int main(int argc, char *argv[]) {
         {"warm up access", required_argument, nullptr, 'w'},
         {"manual remote latency", required_argument, nullptr, 'm'},
         {"rocksdb path", required_argument, nullptr, 'd'},
+        {"report interval", required_argument, nullptr, 'r'},
         {nullptr, 0, nullptr, 0}};
     while ((opt = getopt_long(argc, argv, short_options, long_options,
                               nullptr)) != -1) {
@@ -401,8 +394,13 @@ int main(int argc, char *argv[]) {
                 break;
             case 'm':
                 simulated_network_latency = stoi(optarg);
+                break;
             case 'd':
                 kDBPath = optarg;
+                break;
+            case 'r':
+                report_interval = stoi(optarg);
+                break;
             case '?':
             default:
                 std::cerr << "Unknown option\n";
@@ -416,7 +414,7 @@ int main(int argc, char *argv[]) {
         } else {
             str_length = to_string(maxLength);
         }
-        kDBPath = "/tmp/new_rocksdb_simple_" + str_length + "_" + traceFile;
+        kDBPath = "/tmp/rocksdb";
     }
     /* initialize connection of rocksdb & memcached */
     rocksDB = rocksdb_create();
@@ -430,11 +428,11 @@ int main(int argc, char *argv[]) {
     }
     /* get trace */
     FILE *pFile;
-    std::string filename;
-    filename = "traces/" + traceFile + ".lis";
-    pFile = fopen(filename.c_str(), "r");
+//    std::string filename;
+//    filename = "traces/" + traceFile + ".lis";
+    pFile = fopen(traceFile.c_str(), "r");
     if (pFile == nullptr) {
-        cerr << "File " << filename << " open failed!" << std::endl;
+        cerr << "File " << traceFile << " open failed!" << std::endl;
         return 0;
     }
     trace_line l;
@@ -459,17 +457,17 @@ int main(int argc, char *argv[]) {
     for (int i = 0; i < threadNum; i++) {
         pthread_join(threads[i], NULL);
     }
-    printf("Sampled %zu, now calculating tail latency...\n",
-           latency_vec.size());
-    std::sort(latency_vec.begin(), latency_vec.end());
-    static std::vector<double> stastic_percentiles;
-    for (int i = 0; i <= 100; i++) {
-        stastic_percentiles.push_back(i / 100.0);
-    }
-    for (double percentile : stastic_percentiles) {
-        printf("Percentage %.8f%%: %.8fms\n", percentile * 100,
-               latency_vec[(int)(latency_vec.size() * percentile)]);
-    }
+//    printf("Sampled %zu, now calculating tail latency...\n",
+//           latency_vec.size());
+//    std::sort(latency_vec.begin(), latency_vec.end());
+//    static std::vector<double> stastic_percentiles;
+//    for (int i = 0; i <= 100; i++) {
+//        stastic_percentiles.push_back(i / 100.0);
+//    }
+//    for (double percentile : stastic_percentiles) {
+//        printf("Percentage %.8f%%: %.8fms\n", percentile * 100,
+//               latency_vec[(int)(latency_vec.size() * percentile)]);
+//    }
     delete rocksDB;
     return 0;
 }
