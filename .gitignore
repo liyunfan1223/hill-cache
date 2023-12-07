@@ -17,5 +17,4 @@ unittest/generic_test.cpp
 *.pyc
 *.log
 *.o
-traces.rar
 __pycache__

@@ -19,20 +19,21 @@
 #include "unittest_utils.h"
 
 std::unordered_map<std::string, CachePolicy> cachePolicy = {
-    {"LRU", CachePolicy::LRU},     {"LFU", CachePolicy::LFU},
-    {"ARC", CachePolicy::ARC},     {"OPT", CachePolicy::OPT},
-    {"SRRIP", CachePolicy::SRRIP}, {"DRRIP", CachePolicy::DRRIP},
-    {"EFSW", CachePolicy::EFSW},   {"LRFU", CachePolicy ::LRFU},
-    {"LIRS", CachePolicy::LIRS},   {"DLIRS", CachePolicy::DLIRS},
-    {"CACHEUS", CachePolicy::CACHEUS}, {"HILL", CachePolicy::HILL}
-};
+    {"LRU", CachePolicy::LRU},         {"LFU", CachePolicy::LFU},
+    {"ARC", CachePolicy::ARC},         {"OPT", CachePolicy::OPT},
+    {"SRRIP", CachePolicy::SRRIP},     {"DRRIP", CachePolicy::DRRIP},
+    {"EFSW", CachePolicy::EFSW},       {"LRFU", CachePolicy ::LRFU},
+    {"LIRS", CachePolicy::LIRS},       {"DLIRS", CachePolicy::DLIRS},
+    {"CACHEUS", CachePolicy::CACHEUS}, {"HILL", CachePolicy::HILL}};
 
 void usage() {
     std::cout << "Usage: ./proto [options]\n"
               << "Options:\n"
               << "  -h, --help             Show this help message\n"
-              << "  -c, --cache-policy     Cache policy (LRU, LFU, ARC, SRRIP, DRRIP, LRFU, LIRS, DLIRS, CACHEUS, HILL, OPT)\n"
-              << "  -b, --buffer-size      Buffer size \n"
+              << "  -c, --cache-policy     Cache policy (LRU, LFU, ARC, SRRIP, "
+                 "DRRIP, LRFU, LIRS, DLIRS, CACHEUS, HILL, OPT)\n"
+              << "  -b, --buffer-size      Buffer size (expressed as a decimal "
+                 "in proportion to footprint)\n"
               << "  -t, --trace-file       Trace file path\n"
               << "  -s, --stats-interval   Statistics reporting interval\n";
 }
@@ -50,8 +51,7 @@ int main(int argc, char **argv) {
         {"buffer size", required_argument, nullptr, 'b'},
         {"trace file", required_argument, nullptr, 't'},
         {"stats interval", required_argument, nullptr, 's'},
-        {nullptr, 0, nullptr, 0}
-    };
+        {nullptr, 0, nullptr, 0}};
     while ((opt = getopt_long(argc, argv, short_options, long_options,
                               nullptr)) != -1) {
         switch (opt) {
@@ -100,7 +100,7 @@ int main(int argc, char **argv) {
         params[i - optind] = argv[i];
     }
     timeval start_time;
-    gettimeofday(&start_time, NULL);
+    gettimeofday(&start_time, nullptr);
     switch (cachePolicy.at(cache_policy)) {
         case CachePolicy::LRU:
             UnittestUtils::make_test(
@@ -120,50 +120,50 @@ int main(int argc, char **argv) {
         case CachePolicy::OPT:
             UnittestUtils::make_test(
                 trace_file, std::make_shared<OPTReplacer>(
-                            buffer_size, stats_interval, access_list));
+                                buffer_size, stats_interval, access_list));
             break;
         case CachePolicy::SRRIP:
             if (aargc <= BASIC_MAIN_ARG_NUM) {
                 UnittestUtils::make_test(trace_file,
                                          std::make_shared<SRRIPReplacer>(
-                                                 buffer_size, stats_interval));
+                                             buffer_size, stats_interval));
             } else {
                 UnittestUtils::make_test(
                     trace_file,
-                    std::make_shared<SRRIPReplacer>(
-                            buffer_size, stats_interval, std::stof(params[0])));
+                    std::make_shared<SRRIPReplacer>(buffer_size, stats_interval,
+                                                    std::stof(params[0])));
             }
             break;
         case CachePolicy::DRRIP:
             if (aargc <= BASIC_MAIN_ARG_NUM) {
                 UnittestUtils::make_test(trace_file,
                                          std::make_shared<DRRIPReplacer>(
-                                                 buffer_size, stats_interval));
+                                             buffer_size, stats_interval));
             } else {
                 UnittestUtils::make_test(
                     trace_file,
-                    std::make_shared<DRRIPReplacer>(
-                            buffer_size, stats_interval, std::stof(params[0])));
+                    std::make_shared<DRRIPReplacer>(buffer_size, stats_interval,
+                                                    std::stof(params[0])));
             }
             break;
         case CachePolicy::EFSW:
             if (aargc <= BASIC_MAIN_ARG_NUM) {
                 UnittestUtils::make_test(trace_file,
                                          std::make_shared<EFSWCacheManager>(
-                                                 buffer_size, stats_interval));
+                                             buffer_size, stats_interval));
             } else {
                 UnittestUtils::make_test(
                     trace_file,
                     std::make_shared<EFSWCacheManager>(
-                            buffer_size, stats_interval, std::stof(params[0]),
-                            std::stof(params[1]), std::stof(params[2])));
+                        buffer_size, stats_interval, std::stof(params[0]),
+                        std::stof(params[1]), std::stof(params[2])));
             }
             break;
         case CachePolicy::LRFU:
             if (aargc <= BASIC_MAIN_ARG_NUM) {
-                UnittestUtils::make_test(trace_file,
-                                         std::make_shared<LRFUReplacer>(
-                                                 buffer_size, stats_interval));
+                UnittestUtils::make_test(
+                    trace_file, std::make_shared<LRFUReplacer>(buffer_size,
+                                                               stats_interval));
             } else if (aargc <= BASIC_MAIN_ARG_NUM + 1) {
                 UnittestUtils::make_test(
                     trace_file,
@@ -179,9 +179,9 @@ int main(int argc, char **argv) {
             break;
         case CachePolicy::LIRS:
             if (aargc <= BASIC_MAIN_ARG_NUM) {
-                UnittestUtils::make_test(trace_file,
-                                         std::make_shared<LIRSReplacer>(
-                                                 buffer_size, stats_interval));
+                UnittestUtils::make_test(
+                    trace_file, std::make_shared<LIRSReplacer>(buffer_size,
+                                                               stats_interval));
             } else {
                 UnittestUtils::make_test(
                     trace_file,
@@ -193,35 +193,35 @@ int main(int argc, char **argv) {
             if (aargc <= BASIC_MAIN_ARG_NUM) {
                 UnittestUtils::make_test(trace_file,
                                          std::make_shared<DLIRSReplacer>(
-                                                 buffer_size, stats_interval));
+                                             buffer_size, stats_interval));
             } else {
                 UnittestUtils::make_test(
                     trace_file,
-                    std::make_shared<DLIRSReplacer>(
-                            buffer_size, stats_interval, std::stof(params[0])));
+                    std::make_shared<DLIRSReplacer>(buffer_size, stats_interval,
+                                                    std::stof(params[0])));
             }
             break;
         case CachePolicy::HILL:
             if (aargc <= BASIC_MAIN_ARG_NUM) {
-                UnittestUtils::make_test(trace_file,
-                                         std::make_shared<HillReplacer>(
-                                                 buffer_size, stats_interval));
+                UnittestUtils::make_test(
+                    trace_file, std::make_shared<HillReplacer>(buffer_size,
+                                                               stats_interval));
             } else {
                 UnittestUtils::make_test(
                     trace_file,
                     std::make_shared<HillReplacer>(
-                            buffer_size, stats_interval, std::stof(params[0]),
-                            std::stof(params[1]), std::stof(params[2]),
-                            std::stof(params[3]), std::stof(params[4]),
-                            std::stof(params[5]), std::stof(params[6]),
-                            std::stof(params[7]), std::stof(params[8]),
-                            std::stof(params[9]), std::stof(params[10])));
+                        buffer_size, stats_interval, std::stof(params[0]),
+                        std::stof(params[1]), std::stof(params[2]),
+                        std::stof(params[3]), std::stof(params[4]),
+                        std::stof(params[5]), std::stof(params[6]),
+                        std::stof(params[7]), std::stof(params[8]),
+                        std::stof(params[9]), std::stof(params[10])));
             }
             break;
         case CachePolicy::CACHEUS:
             UnittestUtils::make_test(
-                trace_file, std::make_shared<CACHEUSReplacer>(buffer_size,
-                                                              stats_interval));
+                trace_file,
+                std::make_shared<CACHEUSReplacer>(buffer_size, stats_interval));
             break;
         default:
             break;

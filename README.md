@@ -1,5 +1,7 @@
 # Hill-Cache
-We provide a prototype and a benchmark for MemHC.
+We provide a prototype for Hill-cache and a benchmark for MemHC.
+
+The implementation of MemHC is at https://github.com/liyunfan1223/MemHC
 
 ## Prototype
 
@@ -20,7 +22,7 @@ Usage: ./proto [options]
 Options:
   -h, --help             Show this help message
   -c, --cache-policy     Cache policy (LRU, LFU, ARC, SRRIP, DRRIP, LRFU, LIRS, DLIRS, CACHEUS, HILL, OPT)
-  -b, --buffer-size      Buffer size
+  -b, --buffer-size      Buffer size (decimal represents the ratio to the footprint, integer represents the size)
   -t, --trace-file       Trace file path
   -s, --stats-interval   Statistics reporting interval
 ```

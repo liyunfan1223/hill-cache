@@ -1,5 +1,9 @@
+import os
+import sys
+sys.path.append(os.path.join(os.path.dirname(__file__), '../..'))
 import subprocess
 import time
+from scripts.config import config_bench
 
 THREADS_LIST = [512, 256, 128, 64, 32, 16, 8, 4, 2, 1]
 LOGFILE = 'log1201'
@@ -16,8 +20,9 @@ def bench(thread_num, value_size, memcached_mem, trace_file, memc_suffix, server
     # print(1)
     time.sleep(3)
     # print(5)
-    bench_process = subprocess.Popen(["build/rocksdb_use_multi_threads", f"{thread_num}", f"{value_size}", f"{trace_file}",
-                                      f"{1 if early_stop else 0}", f"{1 if threads_sync else 0}", f"{1 if has_warmup else 0} 1", "10"],
+    bench_process = subprocess.Popen(["build/bin/bench", "-t", f"{thread_num}", "-l", f"{value_size}", "-f", f"{trace_file}",
+                                      "-e", f"{early_stop}", "-s", f"{1 if threads_sync else 0}", "-w", f"{1 if has_warmup else 0} 1",
+                                      "-m", "10"],
                                      stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     output, errors = bench_process.communicate()
     if len(errors) > 0:
@@ -32,8 +37,6 @@ def bench(thread_num, value_size, memcached_mem, trace_file, memc_suffix, server
                 result_str += item + '\n'
             log = f"Time: {time.time()} Args: threads-{thread_num} value_size-{value_size} memcached_mem-{memcached_mem} server_thread-{server_thread} "\
                   f"trace-{trace_file} memc_suffix-{memc_suffix} earle_stop-{early_stop} threads_sync-{threads_sync} has_warmup-{has_warmup} \n{result_str}"
-            # results.append(log)
-            # result_str = log + result_str
             print("result: ", log)
             with open(f"local/{LOGFILE}.txt", "a") as f:
                 f.write(f"{log}\n")

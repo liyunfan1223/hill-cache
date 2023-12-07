@@ -17,6 +17,7 @@
 #include <thread>
 
 #include "def.h"
+#include "getopt.h"
 
 using ROCKSDB_NAMESPACE::DB;
 using ROCKSDB_NAMESPACE::Options;
@@ -27,18 +28,17 @@ using ROCKSDB_NAMESPACE::WriteBatch;
 using ROCKSDB_NAMESPACE::WriteOptions;
 using namespace std;
 
-const uint32_t MAX_THREAD_NUM = 1 << 20;
-const uint32_t MAX_TOTAL_COUNTER = 1 << 20;
+const uint32_t MAX_THREAD_NUM = 1 << 12;
+// const uint32_t MAX_TOTAL_COUNTER = 1 << 20;
 const uint32_t MEGABYTES = 1 << 20;
 const char *config_string = "--SERVER=127.0.0.1";
 const uint32_t warmup_seconds = 30;
-const uint32_t warmup_access = 1 << 20;
 const uint32_t report_interval = 1 << 14;
 
 // const uint32_t simulated_network_latency = 5; // 5ms - 10ms for network
 // request
 uint32_t simulated_network_latency = 0;
-bool earlyStop = false;
+int32_t earlyStop = 0;
 uint32_t maxLength;
 uint32_t threadNum;
 std::string kDBPath;
@@ -57,7 +57,8 @@ timeval start_time[MAX_THREAD_NUM + 1];
 
 vector<int> access_list;
 int warming_up_counter = 0;
-int hasWarmup;
+bool hasWarmup = false;
+uint32_t warmup_access = 0;
 bool test_finished = false;
 pthread_mutex_t stats_mutex;
 
@@ -311,9 +312,8 @@ void *subprocess_work(void *arg) {
             fflush(stdout);
 
             pthread_mutex_unlock(&stats_mutex);
-            if (earlyStop && tot_counter > MAX_TOTAL_COUNTER) {
+            if (earlyStop && tot_counter > earlyStop) {
                 test_finished = true;
-                //                printf("Finished.\n");
             }
         }
         if (test_finished && earlyStop) return 0;
@@ -341,41 +341,82 @@ void *subprocess_work(void *arg) {
     return nullptr;
 }
 
-/* argv: threadNum - maxLength - traceFile - earlyStop - threadsSync - hasWarmup
- * - manualLatency*/
+void usage() {
+    std::cout << "Usage: ./bin/bench [options]\n"
+              << "Options:\n"
+              << "  -h, --help                          Show help message\n"
+              << "  -t, --thread-number <num>           Number of threads\n"
+              << "  -l, --max-data-length <len>         Maximum data length\n"
+              << "  -f, --trace-file <file>             Trace file\n"
+              << "  -e, --early-stop-access <num>       Early stop access\n"
+              << "  -s, --sync-threads <num>            Synchronize threads\n"
+              << "  -w, --warm-up-access <num>          Warm-up access\n"
+              << "  -m, --manual-remote-latency <num>   Set the manual remote latency\n"
+              << "  -d, --rocksdb-path <path>           Set rocksdb path\n";
+}
+
 int main(int argc, char *argv[]) {
     printf("Bench started.\n");
-    threadNum = stoi(argv[1]);
-    if (threadNum <= 0 || threadNum > MAX_THREAD_NUM) {
-        cerr << "Threads number invalid." << std::endl;
-        return 0;
+    int opt;
+    const char *short_options = "ht:l:f:e:sw:m:d:";
+    const option long_options[] = {
+        {"help", no_argument, nullptr, 'h'},
+        {"thread number", required_argument, nullptr, 't'},
+        {"maximum data length", required_argument, nullptr, 'l'},
+        {"trace file", required_argument, nullptr, 'f'},
+        {"early stop access", required_argument, nullptr, 'e'},
+        {"sync threads", no_argument, nullptr, 's'},
+        {"warm up access", required_argument, nullptr, 'w'},
+        {"manual remote latency", required_argument, nullptr, 'm'},
+        {"rocksdb path", required_argument, nullptr, 'd'},
+        {nullptr, 0, nullptr, 0}};
+    while ((opt = getopt_long(argc, argv, short_options, long_options,
+                              nullptr)) != -1) {
+        switch (opt) {
+            case 'h':
+                usage();
+                return 0;
+            case 't':
+                threadNum = stoi(optarg);
+                if (threadNum <= 0 || threadNum > MAX_THREAD_NUM) {
+                    cerr << "Threads number invalid. (range from 1 to " << MAX_THREAD_NUM - 1 << ")\n";
+                    return 0;
+                }
+                break;
+            case 'l':
+                maxLength = stoi(optarg);
+                break;
+            case 'f':
+                traceFile = optarg;
+                break;
+            case 'e':
+                earlyStop = stoi(optarg);
+                break;
+            case 's':
+                threadsSync = true;
+                break;
+            case 'w':
+                hasWarmup = true;
+                warmup_access = stoi(optarg);
+                break;
+            case 'm':
+                simulated_network_latency = stoi(optarg);
+            case 'd':
+                kDBPath = optarg;
+            case '?':
+            default:
+                std::cerr << "Unknown option\n";
+                return 0;
+        }
     }
-    maxLength = stoi(argv[2]);
-    traceFile = argv[3];
-    string str_length;
-    if (maxLength % 1024 == 0) {
-        str_length = to_string(maxLength / 1024) + 'k';
-    } else {
-        str_length = to_string(maxLength);
-    }
-    kDBPath = "/tmp/new_rocksdb_simple_" + str_length + "_" + traceFile;
-    if (argv[4] == nullptr) {
-        cerr << "No early stop option." << std::endl;
-        return 0;
-    }
-    earlyStop = stoi(argv[4]);
-    if (argv[5] == nullptr) {
-        cerr << "No threads synchronize option." << std::endl;
-        return 0;
-    }
-    threadsSync = stoi(argv[5]);
-    if (argv[6] == nullptr) {
-        cerr << "No warmup option." << std::endl;
-        return 0;
-    }
-    hasWarmup = stoi(argv[6]);
-    if (argv[7] != nullptr) {
-        simulated_network_latency = stoi(argv[7]);
+    if (kDBPath.empty()) {
+        string str_length;
+        if (maxLength % 1024 == 0) {
+            str_length = to_string(maxLength / 1024) + 'k';
+        } else {
+            str_length = to_string(maxLength);
+        }
+        kDBPath = "/tmp/new_rocksdb_simple_" + str_length + "_" + traceFile;
     }
     /* initialize connection of rocksdb & memcached */
     rocksDB = rocksdb_create();
@@ -389,9 +430,11 @@ int main(int argc, char *argv[]) {
     }
     /* get trace */
     FILE *pFile;
-    pFile = fopen(("traces/" + traceFile + ".lis").c_str(), "r");
-    if (pFile == NULL) {
-        cerr << "File open failed!" << std::endl;
+    std::string filename;
+    filename = "traces/" + traceFile + ".lis";
+    pFile = fopen(filename.c_str(), "r");
+    if (pFile == nullptr) {
+        cerr << "File " << filename << " open failed!" << std::endl;
         return 0;
     }
     trace_line l;

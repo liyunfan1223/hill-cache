@@ -58,6 +58,8 @@ class SingleTestRunner:
         print('cmdline: ', cmdline)
         res = os.popen(cmdline).read().strip()
         return res
+
+        
 class MultiTestRunner:
 
     def __init__(self, cache_policy_list=None, buffer_size_list=None, trace_file=None, params=None):
