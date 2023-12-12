@@ -66,7 +66,7 @@ int global_i;
 pthread_mutex_t i_mutex;
 bool threadsSync = false;
 
-//std::vector<double> latency_vec;
+// std::vector<double> latency_vec;
 std::mutex latency_mutex;
 
 double GenerateRandomRTT() {
@@ -183,12 +183,12 @@ RequestResult request_item(const char *key, int thread_id, memcached_st *memc) {
     const std::chrono::duration<double, std::milli> elapsed = end - start;
     counter[thread_id][rr]++;
     timer[thread_id][rr] += elapsed.count();
-//    if (rand() % 100 <= 10) {
-//        if (latency_mutex.try_lock()) {
-//            latency_vec.push_back(elapsed.count());
-//            latency_mutex.unlock();
-//        }
-//    }
+    //    if (rand() % 100 <= 10) {
+    //        if (latency_mutex.try_lock()) {
+    //            latency_vec.push_back(elapsed.count());
+    //            latency_mutex.unlock();
+    //        }
+    //    }
     return rr;
 }
 
@@ -342,7 +342,8 @@ void usage() {
               << "  -e, --early-stop-access <num>       Early stop access\n"
               << "  -s, --sync-threads <bool>           Synchronize threads\n"
               << "  -w, --warm-up-access <num>          Warm-up access\n"
-              << "  -m, --manual-remote-latency <num>   Set the manual remote latency\n"
+              << "  -m, --manual-remote-latency <num>   Set the manual remote "
+                 "latency\n"
               << "  -d, --rocksdb-path <path>           Set rocksdb path\n"
               << "  -r, --report-interval <num>         Report interval\n";
 }
@@ -372,7 +373,8 @@ int main(int argc, char *argv[]) {
             case 't':
                 threadNum = stoi(optarg);
                 if (threadNum <= 0 || threadNum > MAX_THREAD_NUM) {
-                    cerr << "Threads number invalid. (range from 1 to " << MAX_THREAD_NUM - 1 << ")\n";
+                    cerr << "Threads number invalid. (range from 1 to "
+                         << MAX_THREAD_NUM - 1 << ")\n";
                     return 0;
                 }
                 break;
@@ -428,8 +430,8 @@ int main(int argc, char *argv[]) {
     }
     /* get trace */
     FILE *pFile;
-//    std::string filename;
-//    filename = "traces/" + traceFile + ".lis";
+    //    std::string filename;
+    //    filename = "traces/" + traceFile + ".lis";
     pFile = fopen(traceFile.c_str(), "r");
     if (pFile == nullptr) {
         cerr << "File " << traceFile << " open failed!" << std::endl;
@@ -457,17 +459,17 @@ int main(int argc, char *argv[]) {
     for (int i = 0; i < threadNum; i++) {
         pthread_join(threads[i], NULL);
     }
-//    printf("Sampled %zu, now calculating tail latency...\n",
-//           latency_vec.size());
-//    std::sort(latency_vec.begin(), latency_vec.end());
-//    static std::vector<double> stastic_percentiles;
-//    for (int i = 0; i <= 100; i++) {
-//        stastic_percentiles.push_back(i / 100.0);
-//    }
-//    for (double percentile : stastic_percentiles) {
-//        printf("Percentage %.8f%%: %.8fms\n", percentile * 100,
-//               latency_vec[(int)(latency_vec.size() * percentile)]);
-//    }
+    //    printf("Sampled %zu, now calculating tail latency...\n",
+    //           latency_vec.size());
+    //    std::sort(latency_vec.begin(), latency_vec.end());
+    //    static std::vector<double> stastic_percentiles;
+    //    for (int i = 0; i <= 100; i++) {
+    //        stastic_percentiles.push_back(i / 100.0);
+    //    }
+    //    for (double percentile : stastic_percentiles) {
+    //        printf("Percentage %.8f%%: %.8fms\n", percentile * 100,
+    //               latency_vec[(int)(latency_vec.size() * percentile)]);
+    //    }
     delete rocksDB;
     return 0;
 }

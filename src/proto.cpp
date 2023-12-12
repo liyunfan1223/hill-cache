@@ -148,9 +148,9 @@ int main(int argc, char **argv) {
             break;
         case CachePolicy::EFSW:
             if (aargc <= BASIC_MAIN_ARG_NUM) {
-                UnittestUtils::make_test(trace_file,
-                                         std::make_shared<EFSWReplacer>(
-                                             buffer_size, stats_interval));
+                UnittestUtils::make_test(
+                    trace_file, std::make_shared<EFSWReplacer>(buffer_size,
+                                                               stats_interval));
             } else {
                 UnittestUtils::make_test(
                     trace_file,

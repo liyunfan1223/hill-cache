@@ -10,8 +10,8 @@
 class EFSWReplacer : public Replacer {
    public:
     EFSWReplacer(int32_t buffer_size, int32_t stats_interval,
-                     double half_life_ratio = 1.0, double miss_score = 1,
-                     double hit_score = 10)
+                 double half_life_ratio = 1.0, double miss_score = 1,
+                 double hit_score = 10)
         : Replacer(buffer_size, stats_interval),
           // lu_heap_(log(0.5) / (half_life_ratio * (buffer_size))),
           luheap_(pow(0.5, (double)1.0 / (half_life_ratio * buffer_size))),
