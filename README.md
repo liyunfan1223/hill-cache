@@ -33,12 +33,17 @@ Options:
 Hill-Cache: buffer_size:30994 hit_count:643989 miss_count:1177420 hit_rate:35.3566%
 ```
 
+### Traces
+
+- [CloudVPS Traces](https://visa.lab.asu.edu/web/resources/traces/traces-cloudvps/)
+- [FIU Traces](http://iotta.snia.org/traces/block-io/414)
+- [MSR Cambridge Traces](http://iotta.snia.org/traces/block-io/388)
 
 ### Scripts
 
 **Installation**
 ```
-pip install -r requirement
+pip install -r requirement.txt
 ```
 **Runner**
 ```
@@ -119,8 +124,9 @@ runtime: 60.39s warming up: 0 average latency: 10.7516 mem: 0.0792 rdb: 12.2247 
 runtime: 68.06s warming up: 0 average latency: 10.6648 mem: 0.0805 rdb: 12.2262 nf: 0.0000 tps: 11999.75 tps_mb: 8.79 tps_mem: 1.13 tps_rdb: 7.66 h_ratio: 12.88% t_counter: 816761 mem:rdb:nf=105194:711567:0
 runtime: 76.16s warming up: 0 average latency: 10.6806 mem: 0.0805 rdb: 12.2232 nf: 0.0000 tps: 11982.17 tps_mb: 8.78 tps_mem: 1.12 tps_rdb: 7.66 h_ratio: 12.73% t_counter: 912504 mem:rdb:nf=116126:796378:0
 runtime: 84.45s warming up: 0 average latency: 10.6777 mem: 0.0806 rdb: 12.2246 nf: 0.0000 tps: 11985.33 tps_mb: 8.78 tps_mem: 1.12 tps_rdb: 7.66 h_ratio: 12.76% t_counter: 1012110 mem:rdb:nf=129124:882986:0
-All threads warmed up, clean stats.
+
 Time: 1701928523.9916859 Args: threads-128 value_size-1024 mem-24 server_thread-8 trace-./traces/example.lis executable-./local/memhc earle_stop-1000000 threads_sync-True has_warmup-200000
+All threads warmed up, clean stats.
 runtime: 6.84s warming up: 0 average latency: 8.7554 mem: 0.0923 rdb: 12.2598 nf: 0.0000 tps: 14603.83 tps_mb: 10.70 tps_mem: 3.08 tps_rdb: 7.61 h_ratio: 28.83% t_counter: 99936 mem:rdb:nf=28811:71125:0
 runtime: 13.35s warming up: 0 average latency: 8.6412 mem: 0.0914 rdb: 12.2611 nf: 0.0000 tps: 14804.22 tps_mb: 10.84 tps_mem: 3.23 tps_rdb: 7.61 h_ratio: 29.77% t_counter: 197579 mem:rdb:nf=58826:138753:0
 runtime: 19.75s warming up: 0 average latency: 8.2877 mem: 0.0973 rdb: 12.2765 nf: 0.0000 tps: 15437.99 tps_mb: 11.31 tps_mem: 3.71 tps_rdb: 7.60 h_ratio: 32.80% t_counter: 304931 mem:rdb:nf=100023:204908:0

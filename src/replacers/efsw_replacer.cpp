@@ -2,9 +2,9 @@
 // Created by Clouds on 2023/1/20.
 //
 
-#include "efsw_cache_manager.h"
+#include "efsw_replacer.h"
 
-RC EFSWCacheManager::access(const Key &key) {
+RC EFSWReplacer::access(const Key &key) {
     double score;
     if (luheap_.InHeap(key)) {
         score = hit_score_;
@@ -26,17 +26,17 @@ RC EFSWCacheManager::access(const Key &key) {
     return RC::SUCCESS;
 }
 
-std::string EFSWCacheManager::get_name() {
+std::string EFSWReplacer::get_name() {
     return std::string("EFSW") + get_configuration();
 }
 
-std::string EFSWCacheManager::get_configuration() {
+std::string EFSWReplacer::get_configuration() {
     return " half life ratio:" + std::to_string(half_life_ratio_) +
            " miss score:" + std::to_string(miss_score_) +
            " hit score:" + std::to_string(hit_score_);
 }
 
-RC EFSWCacheManager::check_consistency() {
+RC EFSWReplacer::check_consistency() {
     //    if (u_map_.size() > buffer_size_ || buffer_set_.size() > buffer_size_)
     //    {
     //        return RC::FAILED;

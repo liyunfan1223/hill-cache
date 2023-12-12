@@ -7,9 +7,9 @@
 #include "lazy_update_heap.h"
 #include "replacer.h"
 
-class EFSWCacheManager : public Replacer {
+class EFSWReplacer : public Replacer {
    public:
-    EFSWCacheManager(int32_t buffer_size, int32_t stats_interval,
+    EFSWReplacer(int32_t buffer_size, int32_t stats_interval,
                      double half_life_ratio = 1.0, double miss_score = 1,
                      double hit_score = 10)
         : Replacer(buffer_size, stats_interval),
@@ -23,7 +23,7 @@ class EFSWCacheManager : public Replacer {
         hit_score_ = hit_score;
     }
 
-    ~EFSWCacheManager() override = default;
+    ~EFSWReplacer() override = default;
 
     RC access(const Key &key) override;
 

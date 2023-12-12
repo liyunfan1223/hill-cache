@@ -6,7 +6,7 @@
 #include "def.h"
 #include "dlirs_replacer.h"
 #include "drrip_replacer.h"
-#include "efsw_cache_manager.h"
+#include "efsw_replacer.h"
 #include "getopt.h"
 #include "hill_replacer.h"
 #include "lfu_replacer.h"
@@ -149,12 +149,12 @@ int main(int argc, char **argv) {
         case CachePolicy::EFSW:
             if (aargc <= BASIC_MAIN_ARG_NUM) {
                 UnittestUtils::make_test(trace_file,
-                                         std::make_shared<EFSWCacheManager>(
+                                         std::make_shared<EFSWReplacer>(
                                              buffer_size, stats_interval));
             } else {
                 UnittestUtils::make_test(
                     trace_file,
-                    std::make_shared<EFSWCacheManager>(
+                    std::make_shared<EFSWReplacer>(
                         buffer_size, stats_interval, std::stof(params[0]),
                         std::stof(params[1]), std::stof(params[2])));
             }

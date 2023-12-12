@@ -1,13 +1,13 @@
-#### configurations for prototype ####
+### configurations for prototype ###
 config = {
     'trace_list': [
         # Example #
         'example'
-        # # CloudVPS #
+        # CloudVPS #
         # 'vps26107', 'vps26391', 'vps26136', 'vps26148', 'vps26215', 'vps26255', 'vps26330', 'vps26511',
-        # # FIU #
+        # FIU #
         # 'webmail', 'websearch', 'webusers', 'online', 'Home1', 'Home2', 'Home3', 'Home4',
-        # # MSR #
+        # MSR #
         # 'msr_usr_0', 'msr_proj_0', 'msr_prn_0', 'msr_hm_0', 'msr_rsrch_0', 'msr_prxy_0',
         # 'msr_src2_0', 'msr_stg_0', 'msr_ts_0', 'msr_web_0', 'msr_mds_0', 'msr_wdev_0',
     ],
@@ -34,7 +34,7 @@ config = {
     'figure_path': './local',
 }
 
-#### configurations for memtier_benchmark ####
+### configurations for memtier_benchmark ###
 config_memtier = {
     'client_thread_list': [16],
     'server_thread_list': [8],
@@ -46,7 +46,7 @@ config_memtier = {
     'log_file': "./local/memtier.log",
 }
     
-#### configurations for bench ####
+### configurations for bench ###
 config_bench = {
     'client_thread_list': [128],
     'server_thread_list': [8],
