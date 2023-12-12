@@ -68,6 +68,8 @@ For memtier bench, you need to install [memtier_benchmark](https://github.com/Re
 
 For web application bench, you need to install libraries of [rocksdb](https://rocksdb.org/) and [libmemcached](https://libmemcached.org/libMemcached.html).
 
+For both benchmarks, you need to install [MemHC](https://github.com/liyunfan1223/MemHC) and [Memcached](https://github.com/memcached/memcached) and place the executable files under the path specified in configuration.
+
 After installation, compile the benchmark target of this project
 ```
 make bench
