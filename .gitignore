@@ -1,0 +1,20 @@
+.vscode/*
+.idea/*
+build/*
+#local/*
+plots/*
+
+# large file
+
+
+cmake-build-debug/
+cmake-build-release/
+venv/
+
+unittest/generic_test.cpp
+.cache
+
+*.pyc
+*.log
+*.o
+__pycache__
