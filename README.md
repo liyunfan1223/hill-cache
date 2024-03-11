@@ -22,7 +22,7 @@ make proto
 Usage: ./proto [options]
 Options:
   -h, --help             Show this help message
-  -c, --cache-policy     Cache policy (LRU, LFU, ARC, SRRIP, DRRIP, LRFU, LIRS, DLIRS, CACHEUS, HILL, OPT)
+  -c, --cache-policy     Cache policy (LRU, LFU, ARC, SRRIP, DRRIP, LRFU, LIRS, DLIRS, CACHEUS, S3FIFO, HILL, OPT)
   -b, --buffer-size      Buffer size (decimal represents the ratio to the footprint, integer represents the size)
   -t, --trace-file       Trace file path
   -s, --stats-interval   Statistics reporting interval
